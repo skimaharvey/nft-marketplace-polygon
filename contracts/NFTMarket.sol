@@ -79,7 +79,7 @@ contract NFTMarket is ReentrancyGuard {
         );
     }
 
-    function createMarketSell(address nftContract, uint256 itemId)
+    function createMarketSale(address nftContract, uint256 itemId)
         public
         payable
         nonReentrant
@@ -109,10 +109,63 @@ contract NFTMarket is ReentrancyGuard {
         MarketItem[] memory items = new MarketItem[](unsoldItemCount);
 
         for (uint256 i = 0; i < itemCount; i++) {
-            if (!idToMarketItem[i].sold) {
-                items.push(idToMarketItem[i]);
+            if (idToMarketItem[i + 1].owner == address(0)) {
+                uint256 currentId = idToMarketItem[i + 1].itemId;
+                MarketItem storage currentItem = idToMarketItem[currentId];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
             }
         }
+        return items;
+    }
+
+    function fetchMyNTS() public view returns (MarketItem[] memory) {
+        uint256 totalItemCount = _itemIds.current();
+        uint256 currentIndex = 0;
+        uint256 itemCount = 0;
+
+        for (uint256 i = 0; i < totalItemCount; i++) {
+            if (idToMarketItem[i + 1].owner == msg.sender) {
+                itemCount += 1;
+            }
+        }
+
+        MarketItem[] memory items = new MarketItem[](itemCount);
+
+        for (uint256 i = 0; i < totalItemCount; i++) {
+            if (idToMarketItem[i + 1].owner == msg.sender) {
+                uint256 currentId = idToMarketItem[i + 1].itemId;
+                MarketItem storage currentItem = idToMarketItem[currentId];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
+            }
+        }
+
+        return items;
+    }
+
+    function fetchItemsCreated() public view returns (MarketItem[] memory) {
+        uint256 totalItemCount = _itemIds.current();
+        uint256 currentIndex = 0;
+        uint256 itemCount = 0;
+
+        for (uint256 i = 0; i < totalItemCount; i++) {
+            if (idToMarketItem[i + 1].seller == msg.sender) {
+                itemCount += 1;
+            }
+        }
+
+        MarketItem[] memory items = new MarketItem[](itemCount);
+
+        for (uint256 i = 0; i < totalItemCount; i++) {
+            if (idToMarketItem[i + 1].seller == msg.sender) {
+                uint256 currentId = idToMarketItem[i + 1].itemId;
+                MarketItem storage currentItem = idToMarketItem[currentId];
+                items[currentIndex] = currentItem;
+                currentIndex += 1;
+            }
+        }
+
         return items;
     }
 }
