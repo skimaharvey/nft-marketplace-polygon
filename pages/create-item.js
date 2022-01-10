@@ -62,16 +62,22 @@ import {
       let transaction = await contract.createToken(url)
       let tx = await transaction.wait()
       let event = tx.events[0]
+      
       let value = event.args[2]
       let tokenId = value.toNumber()
+      console.log("address", await signer.getAddress())
+      // let tokenId = 1 
       const price = ethers.utils.parseUnits(formInput.price, 'ether')
-  
+      console.log("findTokenOwner :", await contract.findTokenOwner(tokenId))
       /* then list the item for sale on the marketplace */
-      contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
-      let listingPrice = await contract.getListingPrice()
+
+      await contract.approve(nftmarketaddress, tokenId) //approve marketplace contract address to be next owner before transfer
+      await transaction.wait(10) //wait for transaction to be in effect
+
+      const marketContract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
+      let listingPrice = await marketContract.getListingPrice()
       listingPrice = listingPrice.toString()
-  
-      transaction = await contract.createMarketItem(nftaddress, tokenId, price, { value: listingPrice })
+      transaction = await marketContract.createMarketItem(nftaddress, tokenId, price, { value: listingPrice })
       await transaction.wait()
       router.push('/')
     }

@@ -19,12 +19,14 @@ export default function Home() {
   }, [])
   async function loadNFTs() {
     /* create a generic provider and query for unsold market items */
-    const provider = new ethers.providers.JsonRpcProvider("https://polygon-mumbai.infura.io/v3/658e704069fa47c5b73407979c8e5931")
     
+    const provider = new ethers.providers.JsonRpcProvider("https://matic-mumbai.chainstacklabs.com")
+
     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)
-    
     const marketContract = new ethers.Contract(nftmarketaddress, Market.abi, provider)
+
     const data = await marketContract.fetchMarketItems()
+    
 
     /*
     *  map over items returned from smart contract and format 
@@ -48,11 +50,17 @@ export default function Home() {
     setNfts(items)
     setLoadingState('loaded') 
   }
+
+
+
   async function buyNft(nft) {
     /* needs the user to sign the transaction, so will use Web3Provider and sign it */
+    // const web3Modal = new Web3Modal()
+    // const connection = await web3Modal.connect()
+    // const provider = new ethers.providers.Web3Provider(connection)
     const web3Modal = new Web3Modal()
     const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
+    const provider = new ethers.providers.Web3Provider(connection)    
     const signer = provider.getSigner()
     const contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
 
@@ -81,7 +89,7 @@ export default function Home() {
                 </div>
                 <div className="p-4 bg-black">
                   <p className="text-2xl mb-4 font-bold text-white">{nft.price} ETH</p>
-                  <button className="w-full bg-pink-500 text-white font-bold py-2 px-12 rounded" onClick={() => buyNft(nft)}>Buy</button>
+                  <button className="w-full bg-pink-500 text-white font-bold py-2 px-12 rounded" onClick={async () => await buyNft(nft)}>Buy</button>
                 </div>
               </div>
             ))
